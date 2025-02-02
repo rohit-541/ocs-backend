@@ -1,13 +1,18 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "package.json",
-        "use": "@vercel/node"
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/main.ts",
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 10
       }
-    ],
-    "env": {
-      "DATABASE_URL": "postgresql://neondb_owner:npg_kn09zIJQmhvj@ep-jolly-breeze-a5483ycf-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
     }
-  }
-  
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/src/main.ts"
+    }
+  ]
+}

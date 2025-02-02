@@ -1,6 +1,5 @@
 import { BadRequestException, Body, Controller, Get, HttpException, InternalServerErrorException, Post, ValidationPipe } from '@nestjs/common';
 import { createDTO, loginDTO } from './loginDTO';
-import { PrismaService } from 'src/prisma';
 import { UserService } from './user.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
@@ -16,7 +15,7 @@ export class UserController {
             const result = await this.userService.login(userName,password);
             return{
                 success:true,
-                user:result
+                ...result
             }
         } catch (error) {
             if(error instanceof HttpException){

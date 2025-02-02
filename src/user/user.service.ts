@@ -10,17 +10,24 @@ export class UserService {
     //Login
     async login(username:string,password:string){
 
-        const result:User = await this.getUser(username,password);
+        const result = await this.getUser(username,password);
         if(result.role == Roles.Admin){
-            return await this.getAllUser();
+            const users =  await this.getAllUser();
+            const admin = result;
+            return {
+                user:result,
+                users:users
+            }
         }else{
-            return result;
+            return {
+                user:result
+            };
         }
     }
 
     //create User
     async createUser(userName:string,password:string,data:any){
-        let admin:User;
+        let admin;
         try {
             admin = await this.getUser(userName,password);
         } catch (error) {
@@ -65,10 +72,24 @@ export class UserService {
             throw new UnauthorizedException("Invalid Credentials");
         }
 
-        return result;
+        return {
+            id:result.id,
+            name:result.name,
+            role:result.role,
+            username:result.username
+        };
     }
 
     async getAllUser(){
-        return await this.prisma.user.findMany();
+        return await this.prisma.user.findMany(
+            {
+                select:{
+                    id:true,
+                    name:true,
+                    role:true,
+                    username:true
+                }
+            }
+        );
     }
 }

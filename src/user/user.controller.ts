@@ -40,7 +40,7 @@ export class UserController {
             }
         } catch (error) {
             if(error instanceof PrismaClientKnownRequestError){
-                if(error.code == "P2025"){
+                if(error.code == "P2002"){
                     throw new BadRequestException("UserName occupied please try different");
                 }
             }

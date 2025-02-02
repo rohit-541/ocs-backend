@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma';
-import bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';
 import { Roles, User } from '@prisma/client';
 @Injectable()
 export class UserService {
@@ -20,8 +20,16 @@ export class UserService {
 
     //create User
     async createUser(userName:string,password:string,data:any){
-
-        const admin = await this.getUser(userName,password);
+        let admin:User;
+        try {
+            admin = await this.getUser(userName,password);
+        } catch (error) {
+            if(error instanceof NotFoundException){
+                throw new UnauthorizedException("Admin not found");
+            }else{
+                throw error;
+            }
+        }
         if(admin.role != Roles.Admin){
             throw new UnauthorizedException("You are not allowed to create user");
         };
@@ -29,8 +37,15 @@ export class UserService {
         const hashedPassword = await bcrypt.hash(data.password,12);
         data.password = hashedPassword;
 
-        const result = await this.prisma.user.create(data);
-        return result;
+        const result = await this.prisma.user.create({
+            data:data
+        });
+        return {
+            id:result.id,
+            name:result.name,
+            Roles:result.role,
+            userName:result.username
+        };
     }
 
     async getUser(username:string,password:string){
@@ -41,7 +56,7 @@ export class UserService {
         });
 
         if(!result){
-            throw new NotFoundException("User Not found");
+            throw new NotFoundException("User not found");
         }
 
         const isValid = await bcrypt.compare(password,result.password);
